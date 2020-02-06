@@ -16,6 +16,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         };
 
+        // configure Send button
+        sendMessageBtn = document.querySelector(".input-group-append");
+        sendMessageBtn.onclick = () => {
+            //take message
+            const text = document.querySelector(".type_msg").value;
+            socket.emit("send message", { "text": text })
+        };
+
     });
 
     // create channel

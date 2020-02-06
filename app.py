@@ -79,5 +79,11 @@ def create_channel(name):
         emit("channel created", data, broadcast=True)
 
 
+@socketio.on("send message")
+def send_message(message):
+    msg = message["text"]
+    print(msg)
+
+
 if __name__ == "__main__":
     socketio.run(app)
