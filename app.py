@@ -10,7 +10,7 @@ socketio = SocketIO(app)
 
 
 logged_in_users = []
-channel_list = []
+channel_list = {}
 channel_template = """
 <li class="{is_active}">
 <div class="d-flex bd-highlight">
@@ -71,10 +71,10 @@ def chat():
 def create_channel(name):
     n = name["name"]
     n = n.strip()
-    if n in channel_list:
+    if n in channel_list.keys():
         emit("error", "Channel is already exists")
     else:
-        channel_list.append(n)
+        channel_list[n] = n
         data = channel_template.format(is_active="", channel_name=n)
         emit("channel created", data, broadcast=True)
 
