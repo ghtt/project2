@@ -1,7 +1,7 @@
 import os
 from functools import wraps
 
-from flask import Flask, session, render_template, request, redirect, url_for
+from flask import Flask, session, render_template, request, redirect, url_for, flash
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
@@ -10,6 +10,15 @@ socketio = SocketIO(app)
 
 
 logged_in_users = []
+channel_list = []
+channel_template = """
+<li class="{is_active}">
+<div class="d-flex bd-highlight">
+<div class="user_info">
+<span>{channel_name}</span>
+</div>
+</div>
+</li>"""
 
 
 def logged_in(func):
@@ -56,6 +65,18 @@ def chat():
     return render_template(
         "chat.html", page_title="Chat", username=session.get("username")
     )
+
+
+@socketio.on("create channel")
+def create_channel(name):
+    n = name["name"]
+    n = n.strip()
+    if n in channel_list:
+        emit("error", "Channel is already exists")
+    else:
+        channel_list.append(n)
+        data = channel_template.format(is_active="", channel_name=n)
+        emit("channel created", data, broadcast=True)
 
 
 if __name__ == "__main__":
