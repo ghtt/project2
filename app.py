@@ -25,7 +25,7 @@ def logged_in(func):
 
 @app.route("/")
 def index():
-    if 'username' in session:
+    if "username" in session:
         return redirect(url_for("chat"))
     return render_template("index.html", page_title="Login")
 
