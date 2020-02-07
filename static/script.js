@@ -34,6 +34,14 @@ document.addEventListener("DOMContentLoaded", () => {
         channelList.innerHTML = channelList.innerHTML + data;
     });
 
+    // receive message
+    socket.on("receive message", msg => {
+        // get message window
+        windowMessages = document.querySelector(".msg_card_body");
+        console.log(msg);
+        windowMessages.innerHTML += msg.text;
+    });
+
     // in case of error
     socket.on("error", data => {
         alert(data);

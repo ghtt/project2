@@ -1,7 +1,7 @@
 import os
 from functools import wraps
 
-from flask import Flask, session, render_template, request, redirect, url_for, flash
+from flask import Flask, session, render_template, request, redirect, url_for
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
@@ -18,7 +18,17 @@ channel_template = """
 <span>{channel_name}</span>
 </div>
 </div>
-</li>"""
+</li>
+"""
+
+msg_template = """
+<div class="d-flex justify-content-{to_user} mb-4">
+<div class="msg_cotainer{send}">
+{text}
+<span class="msg_time">8:40 AM, Today</span>
+</div>
+</div>
+"""
 
 
 def logged_in(func):
@@ -81,8 +91,27 @@ def create_channel(name):
 
 @socketio.on("send message")
 def send_message(message):
-    msg = message["text"]
-    print(msg)
+    # for current user
+    emit(
+        "receive message",
+        {
+            "text": msg_template.format(
+                to_user="end", text=message["text"], send="_send"
+            ),
+            "username": session.get("username"),
+        },
+    )
+
+    # for other users
+    emit(
+        "receive message",
+        {
+            "text": msg_template.format(to_user="start", text=message["text"], send=""),
+            "username": session.get("username"),
+        },
+        broadcast=True,
+        include_self=False,
+    )
 
 
 if __name__ == "__main__":
