@@ -49,8 +49,14 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!div.parentNode.onclick) {
                 div.parentNode.onclick = () => {
                     const chatHeader = document.querySelector(".msg_head > .bd-highlight");
-                    console.log(div);
-                    chatHeader.innerHTML = div.querySelector("span").textContent;
+                    const channel = div.querySelector("span").textContent;
+                    // leave current channel
+                    socket.emit("leave channel")
+                    // connect to channel
+                    socket.emit("connect to channel", { "name": channel });
+                    socket.emit("reload channel history", channel);
+                    // change chat header to selected channel
+                    chatHeader.innerHTML = channel;
                 };
             };
         });
@@ -62,6 +68,24 @@ document.addEventListener("DOMContentLoaded", () => {
         // get message window
         windowMessages = document.querySelector(".msg_card_body");
         windowMessages.innerHTML += msg.text;
+    });
+
+    // user join to a channel
+    socket.on("user is joined", msg => {
+        windowMessages = document.querySelector(".msg_card_body");
+        windowMessages.innerHTML += msg;
+    });
+
+    // user leave a channel
+    socket.on("user is left", msg => {
+        windowMessages = document.querySelector(".msg_card_body");
+        windowMessages.innerHTML += msg;
+    });
+
+    // clear chat history
+    socket.on("clear chat", () => {
+        windowMessages = document.querySelector(".msg_card_body");
+        windowMessages.innerHTML = "";
     });
 
     // in case of error
