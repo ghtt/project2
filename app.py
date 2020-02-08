@@ -83,6 +83,8 @@ def create_channel(name):
     n = n.strip()
     if n in channel_list:
         emit("error", "Channel is already exists")
+    elif not n:
+        emit("error", "Channel name is empty")
     else:
         channel_list.append(n)
         history[n] = []
@@ -93,34 +95,39 @@ def create_channel(name):
 @socketio.on("send message")
 def send_message(message):
     # save msg in history
-    channel = session.get("channel")
-    username = session.get("username")
-    history[channel].append((username, message["text"]))
+    if "channel" not in session.keys():
+        emit("error", "Please join to a channel to send messages")
+    elif not message["text"]:
+        emit("error", "Paste your message before sending")
+    else:
+        channel = session.get("channel")
+        username = session.get("username")
+        history[channel].append((username, message["text"]))
 
-    # send msg for current user
-    emit(
-        "receive message",
-        {
-            "text": msg_template.format(
-                to_user="end", text=message["text"], send="_send", username="",
-            )
-        },
-    )
+        # send msg for current user
+        emit(
+            "receive message",
+            {
+                "text": msg_template.format(
+                    to_user="end", text=message["text"], send="_send", username="",
+                )
+            },
+        )
 
-    # send msg for other users
-    emit(
-        "receive message",
-        {
-            "text": msg_template.format(
-                to_user="start",
-                text=message["text"],
-                send="",
-                username="".join([username, ": "]),
-            ),
-        },
-        room=session.get("channel"),
-        include_self=False,
-    )
+        # send msg for other users
+        emit(
+            "receive message",
+            {
+                "text": msg_template.format(
+                    to_user="start",
+                    text=message["text"],
+                    send="",
+                    username="".join([username, ": "]),
+                ),
+            },
+            room=session.get("channel"),
+            include_self=False,
+        )
 
 
 @socketio.on("connect to channel")
@@ -130,8 +137,8 @@ def connect_to_channel(channel):
     username = session.get("username")
     join_room(name)
     emit(
-        "user is joined",
-        f"{username} is joined to {name}</br>",
+        "user has joined",
+        f"{username} has joined to {name}</br>",
         room=name,
         include_self=False,
     )
@@ -142,8 +149,8 @@ def leave_channel():
     if "channel" in session.keys():
         leave_room(session.get("channel"))
         emit(
-            "user is left",
-            f"{session.get('username')} is left the {session.get('channel')}</br>",
+            "user has left",
+            f"{session.get('username')} has left the {session.get('channel')}</br>",
             room=session.get("channel"),
             include_self=False,
         )
@@ -174,9 +181,20 @@ def reload_channel_history(name):
                         username="".join([msg[0], ": "]),
                     )
                 )
-        print(channel_history)
         emit("receive message", {"text": "".join(channel_history)})
 
 
+@socketio.on("load channels")
+def load_channels():
+    if channel_list:
+        emit(
+            "channels loaded",
+            [
+                channel_template.format(is_active="", channel_name=channel)
+                for channel in channel_list
+            ],
+        )
+
+
 if __name__ == "__main__":
-    socketio.run(app)
+    socketio.run(app, host="0.0.0.0")

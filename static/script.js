@@ -11,8 +11,10 @@ document.addEventListener("DOMContentLoaded", () => {
         createChannelBtn = document.querySelector(".input-group-prepend");
         createChannelBtn.onclick = () => {
             // take new channel name from input field
-            const newChannelName = document.querySelector(".search").value;
-            socket.emit("create channel", { "name": newChannelName });
+            const newChannelName = document.querySelector(".search");
+            socket.emit("create channel", { "name": newChannelName.value });
+            newChannelName.value = "";
+
 
         };
 
@@ -20,15 +22,29 @@ document.addEventListener("DOMContentLoaded", () => {
         sendMessageBtn = document.querySelector(".input-group-append");
         sendMessageBtn.onclick = () => {
             //take message
-            const text = document.querySelector(".type_msg").value;
-            socket.emit("send message", { "text": text })
+            const text = document.querySelector(".type_msg");
+            socket.emit("send message", { "text": text.value })
+            text.value = "";
         };
+
+        // load channels
+        socket.emit("load channels");
 
     });
 
     // create channel
     socket.on("channel created", data => {
-        // get channel list 
+        // get channel list
+        createChannel(data);
+    });
+
+    // channels loaded
+    socket.on("channels loaded", channel_list => {
+        channel_list.forEach(createChannel)
+    });
+
+    function createChannel(data) {
+        console.log(data);
         const channelList = document.querySelector(".contacts");
         // add new channel to the list
         channelList.innerHTML += data;
@@ -60,8 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
             };
         });
-
-    });
+    };
 
     // receive message
     socket.on("receive message", msg => {
@@ -71,13 +86,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // user join to a channel
-    socket.on("user is joined", msg => {
+    socket.on("user has joined", msg => {
         windowMessages = document.querySelector(".msg_card_body");
         windowMessages.innerHTML += msg;
     });
 
     // user leave a channel
-    socket.on("user is left", msg => {
+    socket.on("user has left", msg => {
         windowMessages = document.querySelector(".msg_card_body");
         windowMessages.innerHTML += msg;
     });
