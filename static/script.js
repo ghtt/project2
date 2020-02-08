@@ -46,6 +46,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     li.className = "";
                 };
             };
+            if (!div.parentNode.onclick) {
+                div.parentNode.onclick = () => {
+                    const chatHeader = document.querySelector(".msg_head > .bd-highlight");
+                    console.log(div);
+                    chatHeader.innerHTML = div.querySelector("span").textContent;
+                };
+            };
         });
 
     });
