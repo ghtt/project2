@@ -31,14 +31,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // get channel list 
         const channelList = document.querySelector(".contacts");
         // add new channel to the list
-        channelList.innerHTML = channelList.innerHTML + data;
+        channelList.innerHTML += data;
     });
 
     // receive message
     socket.on("receive message", msg => {
         // get message window
         windowMessages = document.querySelector(".msg_card_body");
-        console.log(msg);
         windowMessages.innerHTML += msg.text;
     });
 

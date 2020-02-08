@@ -24,8 +24,7 @@ channel_template = """
 msg_template = """
 <div class="d-flex justify-content-{to_user} mb-4">
 <div class="msg_cotainer{send}">
-{text}
-<span class="msg_time">8:40 AM, Today</span>
+<b>{username} </b>{text}
 </div>
 </div>
 """
@@ -96,9 +95,8 @@ def send_message(message):
         "receive message",
         {
             "text": msg_template.format(
-                to_user="end", text=message["text"], send="_send"
-            ),
-            "username": session.get("username"),
+                to_user="end", text=message["text"], send="_send", username="",
+            )
         },
     )
 
@@ -106,8 +104,12 @@ def send_message(message):
     emit(
         "receive message",
         {
-            "text": msg_template.format(to_user="start", text=message["text"], send=""),
-            "username": session.get("username"),
+            "text": msg_template.format(
+                to_user="start",
+                text=message["text"],
+                send="",
+                username="".join([session.get("username"), ": "]),
+            ),
         },
         broadcast=True,
         include_self=False,
