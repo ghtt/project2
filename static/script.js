@@ -32,6 +32,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const channelList = document.querySelector(".contacts");
         // add new channel to the list
         channelList.innerHTML += data;
+
+        // add onmouseover and onmouseout actions to channles
+        const liList = document.querySelectorAll(".user_info").forEach(div => {
+            const li = div.parentNode.parentNode;
+            if (!li.onmouseover) {
+                li.onmouseover = () => {
+                    li.className = "active";
+                };
+            };
+            if (!li.onmouseout) {
+                li.onmouseout = () => {
+                    li.className = "";
+                };
+            };
+        });
+
     });
 
     // receive message
